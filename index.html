@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2-lik diskret mantiqiy amallar</title>
+    <style>
+        :root {
+            --bg-main: #06101f;
+            --bg-panel: #0f172a;
+            --bg-card: #0b1220;
+            --text-light: #e5eefc;
+            --text-muted: #94a3b8;
+            --accent: #3b82f6;
+            --border: #1e293b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            width: 100%;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            background: var(--bg-panel);
+            color: var(--text-light);
+            border: 1px solid var(--border);
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .tab-btn.active, .tab-btn:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        /* Header */
+        .header h1 {
+            color: #93c5fd;
+            margin-bottom: 5px;
+            transition: color 0.5s;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+
+        /* Controls */
+        .controls {
+            background: var(--bg-panel);
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        select, input[type="number"], input[type="text"] {
+            background: #1e293b;
+            border: 1px solid #334155;
+            color: white;
+            padding: 8px;
+            border-radius: 4px;
+            outline: none;
+        }
+
+        button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            background: #334155;
+            color: white;
+            transition: 0.2s;
+        }
+
+        button:hover { background: #475569; }
+
+        /* Inputs Area */
+        .inputs-area {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .input-group input { width: 100%; font-family: 'Consolas', monospace; font-size: 16px; }
+
+        /* Action Bar */
+        .action-bar {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            background: var(--bg-panel);
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .action-btn {
+            flex: 1;
+            min-width: 100px;
+            padding: 12px;
+            color: white;
+            font-size: 16px;
+            opacity: 0.9;
+            transform: scale(1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .action-btn:hover { opacity: 1; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+
+        /* Result Panel */
+        .result-panel {
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            min-height: 400px;
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.5s;
+        }
+
+        .result-header {
+            padding: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            transition: background-color 0.5s;
+        }
+
+        .result-body { padding: 20px; }
+
+        .result-stats {
+            display: flex;
+            gap: 30px;
+            color: #cbd5e1;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            color: #93c5fd;
+            font-size: 18px;
+            margin: 20px 0 10px 0;
+            border-bottom: 1px solid #1e293b;
+            padding-bottom: 5px;
+        }
+
+        .math-step {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-family: 'Consolas', monospace;
+            font-size: 24px;
+            margin: 5px 0;
+            padding-left: 20px;
+        }
+
+        .math-symbol { font-weight: bold; width: 30px; text-align: center; }
+        
+        .math-line {
+            height: 2px;
+            background: #64748b;
+            margin: 10px 0 10px 65px;
+            width: calc(100% - 65px);
+            max-width: 400px;
+        }
+
+        .final-result-box {
+            background: #111827;
+            border: 2px solid transparent; 
+            padding: 15px 20px;
+            border-radius: 8px;
+            display: inline-block;
+            font-family: 'Consolas', monospace;
+            font-size: 24px;
+            font-weight: bold;
+            transition: border-color 0.5s, color 0.5s;
+        }
+
+        /* Truth Table Tab */
+        #truth-tab { display: none; }
+        
+        .truth-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: var(--bg-card);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .truth-table th, .truth-table td {
+            padding: 12px 15px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+            font-family: 'Consolas', monospace;
+            font-size: 18px;
+        }
+        
+        .truth-table th {
+            background: var(--bg-panel);
+            color: var(--text-muted);
+            font-weight: bold;
+        }
+        
+        .truth-table .result-col {
+            background: rgba(255, 255, 255, 0.05);
+            font-weight: bold;
+        }
+        
+        .truth-table tr:hover { background: rgba(255, 255, 255, 0.02); }
+
+        /* ANIMATIONS */
+        .fade-in-up {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.5s ease forwards;
+        }
+
+        @keyframes fadeInUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulseColor {
+            0% { color: #8EC5FF; }
+            50% { color: #C3E4FF; }
+            100% { color: #8EC5FF; }
+        }
+        .animated-title { animation: pulseColor 2s infinite; }
+
+        .welcome-msg { color: #94a3b8; font-size: 18px; padding: 40px; text-align: center; }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('main')">Asosiy dastur</button>
+        <button class="tab-btn" onclick="switchTab('truth')">Haqiqat jadvali (2^n)</button>
+    </div>
+
+    <div id="main-tab">
+        <div class="header">
+            <h1 class="animated-title">2-lik diskret mantiqiy amallar laboratoriyasi</h1>
+            <p>Ikkilik mantiq generatori va kalkulyatori. Kiritishlar soniga mos Haqiqat jadvalini yarating!</p>
+        </div>
+
+        <div class="controls">
+            <label>Mantiqiy amal:</label>
+            <select id="op-select" onchange="updateInputsUI()">
+                <option value="AND">AND</option>
+                <option value="OR">OR</option>
+                <option value="NOT">NOT</option>
+                <option value="NAND">NAND</option>
+                <option value="NOR">NOR</option>
+                <option value="XOR">XOR</option>
+                <option value="XNOR">XNOR</option>
+            </select>
+
+            <label>Kirishlar soni (n):</label>
+            <input type="number" id="count-input" value="2" min="1" max="10" onchange="updateInputsUI()">
+
+            <button onclick="updateInputsUI()" style="background: var(--accent);">Yangilash</button>
+            <button onclick="fillExample()">Namuna</button>
+            <button onclick="clearAll()">Tozalash</button>
+        </div>
+
+        <div class="inputs-area" id="inputs-container">
+            </div>
+
+        <div class="action-bar" id="action-bar">
+            </div>
+
+        <div class="result-panel" id="result-panel">
+            <div class="welcome-msg">
+                <h2>Natija paneli</h2>
+                <p>Bu yerda siz kiritgan uzun o'lchamli ikkilik kodlar qadamma-qadam hisoblanadi.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="truth-tab">
+        </div>
+</div>
+
+<script>
+    const OP_COLORS = { AND: "#22c55e", OR: "#3b82f6", NOT: "#f59e0b", NAND: "#ef4444", NOR: "#8b5cf6", XOR: "#06b6d4", XNOR: "#ec4899" };
+    const OP_SYMBOLS = { AND:"∧", OR:"∨", NOT:"¬", NAND:"↑", NOR:"↓", XOR:"⊕", XNOR:"⊙" };
+    const OPS = Object.keys(OP_COLORS);
+
+    function init() {
+        buildActionBar();
+        updateInputsUI();
+    }
+
+    function switchTab(tab) {
+        document.getElementById('main-tab').style.display = tab === 'main' ? 'block' : 'none';
+        document.getElementById('truth-tab').style.display = tab === 'truth' ? 'block' : 'none';
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+    }
+
+    function buildActionBar() {
+        const bar = document.getElementById('action-bar');
+        bar.innerHTML = '';
+        OPS.forEach(op => {
+            const btn = document.createElement('button');
+            btn.className = 'action-btn';
+            btn.innerText = op;
+            btn.style.backgroundColor = OP_COLORS[op];
+            btn.onclick = () => calculate(op);
+            bar.appendChild(btn);
+        });
+    }
+
+    function updateInputsUI() {
+        const op = document.getElementById('op-select').value;
+        const countInput = document.getElementById('count-input');
+        let count = parseInt(countInput.value) || 2;
+
+        if (op === "NOT") {
+            count = 1;
+            countInput.value = 1;
+            countInput.disabled = true;
+        } else {
+            if (count < 2) { count = 2; countInput.value = 2; }
+            countInput.disabled = false;
+        }
+
+        const container = document.getElementById('inputs-container');
+        const oldValues = Array.from(container.querySelectorAll('input')).map(inp => inp.value);
+        
+        container.innerHTML = '';
+        for (let i = 0; i < count; i++) {
+            const div = document.createElement('div');
+            div.className = 'input-group fade-in-up';
+            div.style.animationDelay = `${i * 0.05}s`;
+            const varName = String.fromCharCode(65 + i); // A, B, C...
+            div.innerHTML = `<label style="min-width:70px;">Kirish ${varName}:</label>
+                             <input type="text" class="bin-input" value="${oldValues[i] || ''}" placeholder="1010...">`;
+            container.appendChild(div);
+        }
+        
+        // Haqiqat jadvalini dinamik yaratamiz
+        generateDynamicTruthTable(count, op);
+    }
+
+    function generateDynamicTruthTable(n, op) {
+        let tableHTML = '<table class="truth-table fade-in-up"><thead><tr>';
+        
+        // Header qismi (A, B, C...)
+        for (let i = 0; i < n; i++) {
+            tableHTML += `<th>${String.fromCharCode(65 + i)}</th>`;
+        }
+        tableHTML += `<th class="result-col" style="color:${OP_COLORS[op]}">${op}</th></tr></thead><tbody>`;
+
+        // 2^n formula bo'yicha qatorlar soni
+        const rows = Math.pow(2, n); 
+        
+        for (let i = 0; i < rows; i++) {
+            // Ikkilik sanoq sistemasiga o'tkazish va n xonagacha nollar bilan to'ldirish
+            const binStr = i.toString(2).padStart(n, '0');
+            const bits = binStr.split('');
+
+            // Qiymatni hisoblash
+            let res = bits[0];
+            if (op === "NOT") {
+                res = bits[0] === '0' ? '1' : '0';
+            } else {
+                let coreOp = op.replace("N", ""); 
+                if(op === "XNOR") coreOp = "XOR";
+                if(op === "NAND") coreOp = "AND";
+                if(op === "NOR") coreOp = "OR";
+
+                for(let j = 1; j < n; j++) {
+                    let x = res === '1';
+                    let y = bits[j] === '1';
+                    let stepRes = false;
+                    
+                    if(coreOp === "AND") stepRes = x && y;
+                    else if(coreOp === "OR") stepRes = x || y;
+                    else if(coreOp === "XOR") stepRes = x !== y;
+                    
+                    res = stepRes ? '1' : '0';
+                }
+                
+                if (["NAND", "NOR", "XNOR"].includes(op)) {
+                    res = res === '0' ? '1' : '0';
+                }
+            }
+
+            // HTML qatoriga qo'shish
+            tableHTML += `<tr>`;
+            bits.forEach(bit => {
+                tableHTML += `<td>${bit}</td>`;
+            });
+            tableHTML += `<td class="result-col" style="color: ${OP_COLORS[op]}">${res}</td></tr>`;
+        }
+        tableHTML += '</tbody></table>';
+
+        document.getElementById('truth-tab').innerHTML = `
+            <div class="welcome-msg fade-in-up">
+                <h2 style="color: ${OP_COLORS[op]}">${n} o'zgaruvchili ${op} amali uchun Haqiqat Jadvali</h2>
+                <p>Jami qatorlar soni: 2<sup>${n}</sup> = ${rows}</p>
+            </div>
+            ${tableHTML}
+        `;
+    }
+
+    function fillExample() {
+        const op = document.getElementById('op-select').value;
+        const samples = {
+            "AND": ["1011", "0110"], "OR": ["1010", "0011"], "NOT": ["101011"],
+            "NAND": ["1111", "1010"], "NOR": ["1000", "0100"],
+            "XOR": ["1010", "1100"], "XNOR": ["1010", "1010"]
+        };
+        const vals = samples[op] || ["1010", "1100"];
+        document.getElementById('count-input').value = vals.length;
+        updateInputsUI();
+        const inputs = document.querySelectorAll('.bin-input');
+        vals.forEach((v, i) => { if (inputs[i]) inputs[i].value = v; });
+    }
+
+    function clearAll() {
+        document.querySelectorAll('.bin-input').forEach(inp => inp.value = '');
+        document.getElementById('result-panel').innerHTML = `
+            <div class="welcome-msg fade-in-up">
+                <h2>Natija paneli tozalangan</h2>
+            </div>`;
+        document.getElementById('result-panel').style.borderColor = "var(--border)";
+    }
+
+    function validateBinary(val) {
+        val = val.replace(/\s+/g, '');
+        if (!val) throw new Error("Bo'sh qiymat kiritildi.");
+        if (/[^01]/.test(val)) throw new Error(`Noto'g'ri ikkilik son: ${val}`);
+        return val;
+    }
+
+    function padBinaries(arr) {
+        const maxLen = Math.max(...arr.map(v => v.length));
+        return { padded: arr.map(v => v.padStart(maxLen, '0')), width: maxLen };
+    }
+
+    function bitwiseNot(v) { return v.split('').map(c => c === '0' ? '1' : '0').join(''); }
+    
+    function combineTwo(op, a, b) {
+        let res = "";
+        for(let i=0; i<a.length; i++) {
+            let x = a[i]==='1', y = b[i]==='1';
+            if(op === "AND") res += (x && y) ? '1' : '0';
+            else if(op === "OR") res += (x || y) ? '1' : '0';
+            else if(op === "XOR") res += (x !== y) ? '1' : '0';
+        }
+        if (["NAND", "NOR", "XNOR"].includes(op)) return bitwiseNot(res);
+        return res;
+    }
+
+    function applyOperation(op, values) {
+        const { padded, width } = padBinaries(values);
+        if (op === "NOT") return { padded, result: bitwiseNot(padded[0]) };
+        
+        let result = padded[0];
+        let coreOp = op.replace("N", "");
+        if(op === "XNOR") coreOp = "XOR";
+        if(op === "NAND") coreOp = "AND";
+        if(op === "NOR") coreOp = "OR";
+
+        for (let i = 1; i < padded.length; i++) {
+            result = combineTwo(coreOp, result, padded[i]);
+        }
+        if (["NAND", "NOR", "XNOR"].includes(op)) result = bitwiseNot(result);
+        return { padded, result };
+    }
+
+    function calculate(op) {
+        document.getElementById('op-select').value = op;
+        updateInputsUI(); 
+        
+        try {
+            const inputs = Array.from(document.querySelectorAll('.bin-input'));
+            const rawValues = inputs.map(inp => validateBinary(inp.value));
+            const { padded, result } = applyOperation(op, rawValues);
+            drawResult(op, padded, result);
+        } catch (e) {
+            alert("Xatolik: " + e.message);
+        }
+    }
+
+    function drawResult(op, padded, result) {
+        const panel = document.getElementById('result-panel');
+        const color = OP_COLORS[op];
+        const symbol = OP_SYMBOLS[op];
+        
+        panel.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        panel.style.borderColor = color;
+
+        let mathHTML = '';
+        if (op === "NOT") {
+            mathHTML = `
+                <div class="math-step fade-in-up" style="animation-delay: 0.3s">
+                    <span class="math-symbol" style="color:${color}">${symbol}</span> 
+                    <span style="color:white">${padded[0]}</span>
+                </div>`;
+        } else {
+            mathHTML = `
+                <div class="math-step fade-in-up" style="animation-delay: 0.3s">
+                    <span class="math-symbol"></span> 
+                    <span style="color:white">${padded[0]}</span>
+                </div>`;
+            for (let i = 1; i < padded.length; i++) {
+                mathHTML += `
+                <div class="math-step fade-in-up" style="animation-delay: ${0.3 + i*0.1}s">
+                    <span class="math-symbol" style="color:${color}">${symbol}</span> 
+                    <span style="color:white">${padded[i]}</span>
+                </div>`;
+            }
+        }
+
+        const delayRes = op === "NOT" ? 0.5 : 0.3 + padded.length * 0.1;
+
+        panel.innerHTML = `
+            <div class="result-header" style="background-color: ${color}">
+                ${op} amali (Amaliy natija)
+            </div>
+            <div class="result-body">
+                <div class="result-stats fade-in-up" style="animation-delay: 0.1s">
+                    <span>Kirishlar (n): ${padded.length}</span>
+                    <span>Bit uzunligi: ${result.length}</span>
+                </div>
+                
+                <div class="section-title fade-in-up" style="animation-delay: 0.2s">Bajarilishi</div>
+                <div style="padding-left: 20px;">
+                    ${mathHTML}
+                    <div class="math-line fade-in-up" style="animation-delay: ${delayRes}s"></div>
+                    <div class="math-step fade-in-up" style="animation-delay: ${delayRes + 0.1}s">
+                        <span class="math-symbol"></span> 
+                        <span style="color:${color}; font-weight:bold">${result}</span>
+                    </div>
+                </div>
+
+                <div class="section-title fade-in-up" style="animation-delay: ${delayRes + 0.3}s">Yakuniy Natija</div>
+                <div class="final-result-box fade-in-up" style="color:${color}; border-color:${color}; animation-delay: ${delayRes + 0.4}s">
+                    ${result}
+                </div>
+            </div>
+        `;
+    }
+
+    // Dasturni ishga tushirish
+    window.onload = init;
+</script>
+
+</body>
+</html>

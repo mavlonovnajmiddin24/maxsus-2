@@ -402,10 +402,11 @@
             if (op === "NOT") {
                 res = bits[0] === '0' ? '1' : '0';
             } else {
-                let coreOp = op.replace("N", ""); 
-                if(op === "XNOR") coreOp = "XOR";
+                // BUG TUZATILDI: Xato replace amali o'rniga aniq mantiq yozildi
+                let coreOp = op;
                 if(op === "NAND") coreOp = "AND";
-                if(op === "NOR") coreOp = "OR";
+                else if(op === "NOR") coreOp = "OR";
+                else if(op === "XNOR") coreOp = "XOR";
 
                 for(let j = 1; j < n; j++) {
                     let x = res === '1';
@@ -495,10 +496,12 @@
         if (op === "NOT") return { padded, result: bitwiseNot(padded[0]) };
         
         let result = padded[0];
-        let coreOp = op.replace("N", "");
-        if(op === "XNOR") coreOp = "XOR";
+        
+        // BUG TUZATILDI: Xato replace amali o'rniga aniq mantiq yozildi
+        let coreOp = op;
         if(op === "NAND") coreOp = "AND";
-        if(op === "NOR") coreOp = "OR";
+        else if(op === "NOR") coreOp = "OR";
+        else if(op === "XNOR") coreOp = "XOR";
 
         for (let i = 1; i < padded.length; i++) {
             result = combineTwo(coreOp, result, padded[i]);

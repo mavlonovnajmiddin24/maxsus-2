@@ -13,6 +13,7 @@
             --text-muted: #94a3b8;
             --accent: #3b82f6;
             --border: #1e293b;
+            --error: #ef4444;
         }
 
         * {
@@ -281,7 +282,7 @@
 
     <div id="main-tab">
         <div class="header">
-            <h1 class="animated-title">2-lik diskret mantiqiy amallar laboratoriyasi</h1>
+            <h1 class="animated-title"> Mantiqiy amallar laboratoriyasi</h1>
             <p>Ikkilik mantiq generatori va kalkulyatori. Kiritishlar soniga mos Haqiqat jadvalini yarating!</p>
         </div>
 
@@ -376,8 +377,12 @@
             div.className = 'input-group fade-in-up';
             div.style.animationDelay = `${i * 0.05}s`;
             const varName = String.fromCharCode(65 + i);
+            
+            // XATO Kiritishning oldini olish uchun oninput qo'shildi! 
             div.innerHTML = `<label style="min-width:70px;">Kirish ${varName}:</label>
-                             <input type="text" class="bin-input" value="${oldValues[i] || ''}" placeholder="1010...">`;
+                             <input type="text" class="bin-input" value="${oldValues[i] || ''}" 
+                                    placeholder="1010..." 
+                                    oninput="this.value = this.value.replace(/[^01]/g, '')">`;
             container.appendChild(div);
         }
         
@@ -402,7 +407,6 @@
             if (op === "NOT") {
                 res = bits[0] === '0' ? '1' : '0';
             } else {
-                // BUG TUZATILDI: Xato replace amali o'rniga aniq mantiq yozildi
                 let coreOp = op;
                 if(op === "NAND") coreOp = "AND";
                 else if(op === "NOR") coreOp = "OR";
@@ -468,7 +472,8 @@
     function validateBinary(val) {
         val = val.replace(/\s+/g, '');
         if (!val) throw new Error("Bo'sh qiymat kiritildi.");
-        if (/[^01]/.test(val)) throw new Error(`Noto'g'ri ikkilik son: ${val}`);
+        // VALIDATSIYA: FAQAT 0 VA 1 TEKSHIRUVI
+        if (/[^01]/.test(val)) throw new Error("Dasturga faqat 0 va 1 kiritilsin!");
         return val;
     }
 
@@ -497,7 +502,6 @@
         
         let result = padded[0];
         
-        // BUG TUZATILDI: Xato replace amali o'rniga aniq mantiq yozildi
         let coreOp = op;
         if(op === "NAND") coreOp = "AND";
         else if(op === "NOR") coreOp = "OR";
@@ -520,7 +524,16 @@
             const { padded, result } = applyOperation(op, rawValues);
             drawResult(op, padded, result);
         } catch (e) {
-            alert("Xatolik: " + e.message);
+            // XATOLIK BO'LSA QIZIL OYNA VA MATN CHIQADI
+            const panel = document.getElementById('result-panel');
+            panel.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            panel.style.borderColor = "var(--error)";
+            panel.innerHTML = `
+                <div class="welcome-msg fade-in-up" style="color: var(--error);">
+                    <h2 style="font-size: 26px; margin-bottom: 10px;">⚠️ Xatolik</h2>
+                    <p style="font-size: 20px; color: #f87171; font-weight: bold;">${e.message}</p>
+                </div>
+            `;
         }
     }
 
